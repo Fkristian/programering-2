@@ -43,10 +43,10 @@ defmodule Upg2 do
 
   #ln
   def test3() do
-    e = {:ln, {:num, :x}}
+    e = {:ln, {:var, :x}}
     d = deriv(e, :x)
     c = calc(d,:x, 5)
-     IO.write("expression: #{pprint(e)}\n")
+    IO.write("expression: #{pprint(e)}\n")
     IO.write("derivative: #{pprint(d)}\n")
     IO.write("simplified: #{pprint(simplify(d))}\n")
     IO.write("calculated: #{pprint(simplify(c))}\n")
@@ -107,12 +107,14 @@ d
   def test8() do
     e = {:add, {:mul,{:num, 2},{:exp,{:var, :x},{:num, 2}}},{:add, {:mul, {:num, 3}, {:var, :x}}, {:num, 5}}}
     d = deriv(e, :x)
-    c = calc(d, :x, 4)
+
+
+
+
     IO.write("expresion: #{pprint(e)}\n")
     IO.write("derivative: #{pprint(d)}\n")
     IO.write("simplified: #{pprint(simplify(d))}\n")
-    IO.write("calculated: #{pprint(simplify(c))}\n")
-    simplify(d)
+
   end
 
 
@@ -200,6 +202,7 @@ d
   def pprint({:sin, v}) do "sin (#{pprint(v)})" end
   def pprint({:cos, v}) do "cos (#{pprint(v)})" end
 
+  {:add, {:mul, {:num, 4}, {:var, :x}}, {:num, 3}}
 
   def simplify({:add, e1, e2}) do
    simplify_add(simplify(e1), simplify(e2))
@@ -220,16 +223,19 @@ d
 
 def simplify(e) do e end
 
+  {:add, {:mul, {:num, 4}, {:var, :x}}, {:num, 3}}
+
   def simplify_add({:num, 0}, e2) do e2 end
   def simplify_add(e1, {:num, 0}) do e1 end
   def simplify_add({:num, n1}, {:num, n2}) do {:num, n1+n2} end
-  def simplify_add(n1,n2) do {:num, n1+n2} end
+  def simplify_add(n1,n2) do {:add, n1, n2} end
 
 
   def simplify_sub({:num, 0}, e2) do e2 end
   def simplify_sub(e1, {:num, 0}) do e1 end
   def simplify_sub({:num, n1}, {:num, n2}) do {:num, n1-n2} end
   def simplify_sub(n1,n2) do {n1,n2} end
+
 
 
   def simplify_mul({:num, 0}, _) do {:num, 0} end
