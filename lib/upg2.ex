@@ -55,7 +55,7 @@ defmodule Upg2 do
 
   #div
   def test4() do
-    e = {:div, {:num, 1}, {:var, :x}}
+    e = {:div, {:num, 1}, {:num, 0}}
     d = deriv(e, :x)
   IO.write("expression: #{pprint(e)}\n")
   IO.write("derivative: #{pprint(d)}\n")
@@ -104,9 +104,20 @@ d
 
   end
 
+  def test8() do
+    e = {:add, {:mul,{:num, 2},{:exp,{:var, :x},{:num, 2}}},{:add, {:mul, {:num, 3}, {:var, :x}}, {:num, 5}}}
+    d = deriv(e, :x)
+    c = calc(d, :x, 4)
+    IO.write("expresion: #{pprint(e)}\n")
+    IO.write("derivative: #{pprint(d)}\n")
+    IO.write("simplified: #{pprint(simplify(d))}\n")
+    IO.write("calculated: #{pprint(simplify(c))}\n")
+    simplify(d)
+  end
 
 
   def deriv({:num, _}, _) do {:num, 0} end
+  def deriv({:div, _, {:num, 0}}, _) do {:error,"error, dont devide by 0"} end
   def deriv({:var, v}, v) do {:num, 1} end
   def deriv({:var, _}, _) do {:num, 0} end
   def deriv({:root, {:num, _}, _}) do {:num, 0} end
@@ -176,7 +187,7 @@ d
     {:exp,calc(e1, v, n), calc(e2, v, n)}
   end
 
-
+  def pprint({:error, n}) do "#{n}" end
   def pprint({:num, n}) do "#{n}" end
   def pprint({:var, v}) do "#{v}" end
   def pprint({:add, e1, e2}) do "(#{pprint(e1)} + #{pprint(e2)})" end
@@ -226,6 +237,8 @@ def simplify(e) do e end
   def simplify_mul({:num, 1}, e2) do e2 end
   def simplify_mul(e1, {:num, 1}) do e1 end
   def simplify_mul({:num, n1}, {:num, n2}) do {:num, n1*n2} end
+  def simplify_mul({:num, n1}, {:mul, {:num, n2}, {:var, e1}}) do {:mul, {:num, n1*n2 }, {:var, e1}} end
+  def simplify_mul({:mul, {:num, n2}, {:var, e1}}, {:num, n1}) do {:mul, {:num, n1*n2 }, {:var, e1}} end
   def simplify_mul(e1, e2) do {:mul, e1, e2} end
 
   def simplify_exp(_, {:num, 0}) do {:num, 0} end
@@ -233,7 +246,7 @@ def simplify(e) do e end
   def simplify_exp({:num, n1}, {:num, n2}) do {:num, :math.pow(n1,n2)} end
   def simplify_exp(e1, e2) do {:exp, e1, e2} end
 
-
+  def simplify_div(v, {:num, 0}) do {:error} end
   def simplify_div(v, v) do {:num, 1} end
   def simplify_div(e1, {:num, 1}) do e1 end
   def simplify_div({:num, n1}, {:num, n2}) do {:num, n1/n2} end
