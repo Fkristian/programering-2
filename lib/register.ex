@@ -1,7 +1,7 @@
 defmodule Register do
 
 
-  def new() do [{0, 88},{1, 6},{2, 7},{3, 8},{4, 9},{5, 10}] end
+  def new() do [{0, 0},{1, 0},{2, 0},{3, 0},{4, 0},{5, 0}] end
 
 
 
@@ -36,19 +36,12 @@ defmodule Register do
   def combineList(e, [head | tail]) do combineList([head | e], tail) end
 
   def write(reg, rd, rv) do
-    #IO.write("in1")
     writeR(reg, rd, rv, []) end
   def writeR([{registerAddress, registerValue} | tail], registerAddress, newValue, newList) do
-    #IO.write("in2 \n")
     newList = [{registerAddress, newValue} | newList]
-
     combineList(newList, tail)
-
-
   end
   def writeR([head | tail], registerAddress, newValue, newList) do
-
-
     writeR(tail, registerAddress, newValue, [head | newList])
   end
 
