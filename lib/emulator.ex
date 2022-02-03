@@ -55,7 +55,6 @@ defmodule Emulator do
       {:bne, rs, rt, label} ->
         s = Register.readR(reg, rs)
         t = Register.readR(reg, rt)
-
         case s == t do
           false ->
             pc = Program.findLablePc(labels, label)
@@ -64,10 +63,7 @@ defmodule Emulator do
             pc = pc + 4
             run(pc, code, reg, mem, labels, out)
         end
-
-
     end
-
   end
 
 
