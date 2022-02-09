@@ -1,4 +1,38 @@
 defmodule Prime do
+ def run(n)do
+   IO.write("Insert")
+   IO.write("       ")
+   IO.write("Pri1")
+   IO.write("       ")
+   IO.write("Pri2")
+   IO.write("       ")
+   IO.write("Pri3")
+   IO.write("       \n")
+   timeProces(n,2)
+    end
+  def timeProces(e,n) do
+    cond  do
+      e < n -> :ok
+      true ->
+        IO.write(n)
+        IO.write("           ")
+        {time_in_microseconds, _} =:timer.tc(fn -> pri1(n) end)
+        IO.write(time_in_microseconds)
+        IO.write("           ")
+        {time_in_microseconds, _} =:timer.tc(fn -> pri2(n) end)
+        IO.write(time_in_microseconds)
+        IO.write("           ")
+        {time_in_microseconds, _} =:timer.tc(fn -> pri3(n) end)
+        IO.write(time_in_microseconds)
+        IO.write("           \n")
+        timeProces(e,n*2)
+    end
+
+
+
+
+ end
+
 
   def pri1(n) do
     list = Enum.to_list(2..n)
@@ -9,7 +43,7 @@ defmodule Prime do
     tail = removeNonePrime(prime, tail)
     [prime | pickOutPrime(tail)]
   end
-  def removeNonePrime(prime, [])do [] end
+  def removeNonePrime(_, [])do [] end
   def removeNonePrime(prime, [head | tail])do
     case rem head, prime do
       0 -> removeNonePrime(prime, tail)
