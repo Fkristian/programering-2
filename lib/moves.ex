@@ -1,10 +1,7 @@
 defmodule Moves do
-  # {xs,[],[]} into {ys,[],[]}.
+
   #list [:a, :b, :c, :d, :e] =xs
-  # [:a, :b, :c, :d, :e] ->
-  #
-  #
-  # [one: 3, two: 2,  one: -3,  two: -2,  one: 4,  two: 0,  one: -4, two: 0,  one: 1, two: 2,  one: -1,  two: -2]
+
   #mlist[:c, :d, :b, :e, :a] =ys
 
 
