@@ -33,7 +33,6 @@ defmodule Moves do
   end
 
 
-
   def single({:two,move},{main,one,two})do
     cond do
       move < 0 -> #move from one to main
