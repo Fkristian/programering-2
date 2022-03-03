@@ -1,6 +1,43 @@
 defmodule Huf do
   def run()do freq(text()) end
 
+  def bench(n)do
+    {e, textInPut} = File.read("text.txt")
+    {binaryList, huffTree}= encode(textInPut)
+#
+    charList = String.to_charlist(textInPut)
+    freqTree = freqTree(charList)
+    treeSortedByAmount = pickOut(freqTree, Tree.tree_new())
+    listSorted = treeToList(treeSortedByAmount, [])
+    huffTree= huffBuild(listSorted)
+    decoderTree = buildingHuffList(huffTree, Tree.tree_new(), [])
+
+
+    avgTime = (bench(n, charList,decoderTree, 0) / n)
+    IO.inspect("Encode")
+    IO.inspect(avgTime)
+#    avgTime = (benchD(n, binaryList, huffTree, 0) / n)
+#    IO.inspect("Decode")
+#    IO.inspect(avgTime)
+    :ok
+  end
+  def bench(0, charList, decoderTree, elapsedTime)do
+    elapsedTime
+  end
+
+  def bench(n, charList, decoderTree, elapsedTime)do
+    {time_in_microseconds, _} =:timer.tc(fn -> encodingHuff(charList, [], decoderTree) end)
+    avgTime = bench(n - 1, charList, decoderTree, elapsedTime + time_in_microseconds)
+  end
+  def benchD(0, textInput, elapsedTime)do
+    elapsedTime
+  end
+
+  def benchD(n, binaryList, huffTree, elapsedTime)do
+    {time_in_microseconds, _} =:timer.tc(fn -> decode(binaryList, huffTree) end)
+    avgTime = benchD(n - 1, binaryList, huffTree, elapsedTime + time_in_microseconds)
+  end
+
   def freq(sample) do
     sampleList = String.to_charlist(sample)
     freq(sampleList, Tree.tree_new(), sampleList)
@@ -15,13 +52,49 @@ defmodule Huf do
     freq(rest, freqTree, fullText)
   end
 
-  def makeFreqTreeAmountSorted(freqTree, fullText)do
+  def freqTree(sample) do
+    freqTree(sample, Tree.tree_new(), sample)
+  end
+
+  def freqTree([], freqTree, fullText) do
+    freqTree
+  end
+  def freqTree([char | rest], freqTree, fullText) do
+    freqTree = Tree.tree_insert(char, freqTree)
+    freqTree(rest, freqTree, fullText)
+  end
+
+
+
+
+  def encode(textInput)do
+    charList = String.to_charlist(textInput)
+    freqTree = freqTree(charList)
     treeSortedByAmount = pickOut(freqTree, Tree.tree_new())
     listSorted = treeToList(treeSortedByAmount, [])
     huffTree= huffBuild(listSorted)
-  #  IO.inspect(huffTree)
     decoderTree = buildingHuffList(huffTree, Tree.tree_new(), [])
+    binaryList= encodingHuff(charList, [], decoderTree)
+    {binaryList, huffTree}
+
+  end
+
+  def decode(binaryList, huffTree)do
+    fromBiToCharHuff(huffTree, binaryList,[], huffTree)
+  end
+
+  def makeFreqTreeAmountSorted(freqTree, fullText)do
+    treeSortedByAmount = pickOut(freqTree, Tree.tree_new())
+  #  IO.inspect(treeSortedByAmount)
+    listSorted = treeToList(treeSortedByAmount, [])
+   # IO.inspect(listSorted)
+    huffTree= huffBuild(listSorted)
+      IO.inspect(huffTree)
+    decoderTree = buildingHuffList(huffTree, Tree.tree_new(), [])
+    IO.inspect(decoderTree)
     binaryList= encodingHuff(fullText, [], decoderTree)
+    #IO.inspect(binaryList)
+    #IO.inspect(" -> ")
     fromBiToCharHuff(huffTree, binaryList,[], huffTree)
   end
   def pickOut({:node, e, amount, l, r}, tree)do
@@ -40,7 +113,6 @@ defmodule Huf do
 
 
   def treeToList({:node, e, amount, l, r}, list)do
-    #put in rigth
     list = cond do
       r != :nil -> treeToList(r, list)
       true -> list
@@ -48,13 +120,11 @@ defmodule Huf do
 
     list = [{amount , e} | list]
 
-    #put in curent
     list = cond do
       l != :nil -> treeToList(l, list)
       true -> list
     end
 
-    #put in left
   end
 
 
@@ -68,10 +138,10 @@ defmodule Huf do
   end
 
   def buildingHuffList({_, destination}, wayCollectionTree, way) do
-    Tree.tree_insert_amount_sorted({way, destination}, wayCollectionTree)
+    Tree.tree_insert_amount_sorted({reverse(way), destination}, wayCollectionTree)
   end
 
-  def encodingHuff([], encoded, _)do reverse(encoded) end
+  def encodingHuff([], encoded, _)do encoded end
   def encodingHuff([charToEncode | restToEncode], encoded, decodingTree) do
       binaryRepresentation = Tree.tree_find_amount(charToEncode, decodingTree)
       encoded = deconstructListIntoList(binaryRepresentation, encoded)
@@ -80,31 +150,22 @@ defmodule Huf do
 
   def deconstructListIntoList([], list) do list end
   def deconstructListIntoList([head |tail], list) do
-    deconstructListIntoList(tail, [head | list])
-
+      deconstructListIntoList(tail, [head | list])
   end
 
 
 
-  #def test()do
-  #fromBiToCharHuff({39,{{16,{{8, {{4, 104}, {4, 101}}},{8, {{4, {{2, {{1, 103}, {1, 109}}}, {2, {{1, 97}, {1, 99}}}}}, {4, 116}}}}}, {23, {{10, {{4, 115}, {6, {{3, {{1, 117}, {2, {{1, 108}, {1, 119}}}}}, {3, 105}}}}}, {13, {{6, 32}, {7, {{3, 111}, {4, {{2, 100}, {2, 110}}}}}}}}}}}, [0,0,0], {39,{{16,{{8, {{4, 104}, {4, 101}}},{8, {{4, {{2, {{1, 103}, {1, 109}}}, {2, {{1, 97}, {1, 99}}}}}, {4, 116}}}}}, {23, {{10, {{4, 115}, {6, {{3, {{1, 117}, {2, {{1, 108}, {1, 119}}}}}, {3, 105}}}}}, {13, {{6, 32}, {7, {{3, 111}, {4, {{2, 100}, {2, 110}}}}}}}}}}})
-  #end
   def fromBiToCharHuff({_, letter}, [], list, decodingTree) do
     [letter | list]
   end
-
   def fromBiToCharHuff({_ , {zero, one}}, [head | tail], list,decodingTree) do
     cond do
       head == 0 -> fromBiToCharHuff(zero, tail, list,decodingTree)
       true -> fromBiToCharHuff(one, tail, list,decodingTree)
     end
   end
-
-  def fromBiToCharHuff({_, letter}, [head | tail], list, decodingTree) do
-    cond do
-      head == 0 -> fromBiToCharHuff(decodingTree, tail, [letter | list],decodingTree)
-      true -> fromBiToCharHuff(decodingTree, tail, [letter | list],decodingTree)
-    end
+  def fromBiToCharHuff({_, letter}, binaryList, list, decodingTree) do
+    fromBiToCharHuff(decodingTree, binaryList, [letter | list],decodingTree)
   end
 
   def huffBuild([{firstAmount,firstHead}, {secondAmount, secondHead}| []])do
@@ -112,8 +173,6 @@ defmodule Huf do
   end
 
 
-
-                              #[{1, 104}, {1, 97}, {1, 108}]
   def huffBuild([{firstAmount,firstHead}, {secondAmount, secondHead}| tail])do
 
     list = putInSorted({firstAmount + secondAmount, {{firstAmount,firstHead}, {secondAmount,secondHead}}}, tail)
@@ -138,17 +197,10 @@ defmodule Huf do
     e
   end
   def reverseR(e, [head | tail]) do
-
     reverseR([head | e], tail)
-
   end
 
 
-  #{39, {{16, {{8, {{4, 104}, {4, 101}}},     {8, {{4, {{2, {{1, 103}, {1, 109}}}, {2, {{1, 97}, {1, 99}}}}}, {4, 116}}}}}
-   #{23, {{10,    {{4, 115}, {6, {{3, {{1, 117}, {2, {{1, 108}, {1, 119}}}}}, {3, 105}}}}}, {13, {{6, 32}, {7, {{3, 111}, {4, {{2, 100}, {2, 110}}}}}}}}}}}
-
- #[1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1,
-  # 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, ...]
 
   def sample do
     "the quick brown fox jumps over the lazy dog
@@ -164,10 +216,4 @@ represent english but it is probably not that far off"
 
 
 end
-
-
-
-
-
-
 
