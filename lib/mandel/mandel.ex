@@ -34,7 +34,7 @@ defmodule Mandel do
   def small(x0, y0, xn) do
     width = 960
     height = 540
-    depth = 64
+    depth = 16384
     k = (xn - x0) / width
     image = mandelbrot(width, height, x0, y0, k, depth)
 

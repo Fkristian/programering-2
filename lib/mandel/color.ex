@@ -5,7 +5,7 @@ defmodule Color do
   x = trunc(a)
   y = trunc(255 *(a - x))
 
-  {:rgb, 0, 255 - y, 255}
+  {:rgb, 0, 0, y}
   end
 end
 
